@@ -24,7 +24,30 @@ app.post("/adminSignup", (req, res) => {
 
 })
 
-
+app.post("/adminSignin", (req, res) => {
+    let input = req.body
+    let result = loginModel.find({ username: input.username }).then(
+        (response) => {
+            if (response.length > 0) {
+                const validator = bcrypt.compareSync(input.password, response[0].password)
+                if (validator) {
+                    jwt.sign({ email: input.username }, "E-Architect", { expiresIn: "7d" },
+                        (error, token) => {
+                            if (error) {
+                                res.json({"status":"token creation failed"})
+                            } else {
+                                res.json({ "status": "success", "token": token })
+                            }
+                        })
+                } else {
+                    res.json({ "status": "wrong password" })
+                }
+            } else {
+                res.json({ "status": "username doesn't exist" })
+            }
+        }
+    ).catch()
+})
 
 app.listen(8080, ()=>{
     console.log("server started")
