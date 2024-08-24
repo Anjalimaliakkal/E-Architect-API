@@ -15,7 +15,7 @@ const architectSchema=mongoose.Schema(
         },
         profile_pic:{
             type:String,
-            required:true
+           // required:true
         },
         password:{
             type:String,

@@ -3,7 +3,7 @@ const mongoose=require("mongoose")
 const bcrypt=require("bcrypt")
 const cors=require("cors")
 const jwt=require("jsonwebtoken")
-const loginModel=require("./models/admin")
+const adminModel=require("./models/admin")
 const architectModel=require("./models/architect")
 
 const app=express()
@@ -19,7 +19,7 @@ app.post("/adminSignup", (req, res) => {
     //console.log(hashedpassword)
     input.password = hashedpassword
     console.log(input)
-    let result = new loginModel(input)
+    let result = new adminModel(input)
     result.save()
     res.json({ "status": "success" })
 
@@ -27,7 +27,7 @@ app.post("/adminSignup", (req, res) => {
 
 app.post("/adminSignin", (req, res) => {
     let input = req.body
-    let result = loginModel.find({ username: input.username }).then(
+    let result = adminModel.find({ username: input.username }).then(
         (response) => {
             if (response.length > 0) {
                 const validator = bcrypt.compareSync(input.password, response[0].password)
