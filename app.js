@@ -4,6 +4,7 @@ const bcrypt=require("bcrypt")
 const cors=require("cors")
 const jwt=require("jsonwebtoken")
 const loginModel=require("./models/admin")
+const architectModel=require("./models/architect")
 
 const app=express()
 app.use(cors())
@@ -47,6 +48,20 @@ app.post("/adminSignin", (req, res) => {
             }
         }
     ).catch()
+})
+
+app.post("/addArchitect", (req, res) => {
+    let input = req.body
+    let token=req.headers.token
+    jwt.verify(token,"E-Architect",(error,decoded)=>{
+        if (decoded && decoded.email) {
+            let result=new architectModel(input)
+            result.save()
+            res.json({ "status": "success" })
+        } else {
+            res.json({ "status": "invalid authentication" })
+        }
+    })
 })
 
 app.listen(8080, ()=>{
