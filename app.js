@@ -77,7 +77,6 @@ app.post("/adminSignin", (req, res) => {
      }
 });
 
-
 //architect login
 app.post("/architectLogin", async (req, res) => {
     const { email, password } = req.body;
