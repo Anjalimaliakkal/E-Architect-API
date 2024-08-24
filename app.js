@@ -25,6 +25,7 @@ app.post("/adminSignup", (req, res) => {
 
 })
 
+//admin signup
 app.post("/adminSignin", (req, res) => {
     let input = req.body
     let result = adminModel.find({ username: input.username }).then(
@@ -50,6 +51,7 @@ app.post("/adminSignin", (req, res) => {
     ).catch()
 })
 
+//add architect by admin
 app.post("/addArchitect", (req, res) => {
     let input = req.body
     let token=req.headers.token
@@ -62,6 +64,33 @@ app.post("/addArchitect", (req, res) => {
             res.json({ "status": "invalid authentication" })
         }
     })
+})
+
+//architect login
+app.post("/ArchitectLogin",async(req,res)=>{
+    let input=req.body
+    let result = architectModel.find({ emailid: req.body.emailid }).then(
+        (items) => {
+            if (items.length > 0) {
+                const passwordValidator = bcrypt.compareSync(req.body.password, items[0].password)
+                if (passwordValidator) {
+
+                    jwt.sign({ emailid: req.body.emailid }, "E-Architect", { expiresIn: "7d" },
+                        (error, token) => {
+                            if (error) {
+                                res.json({ "status": "error", "errorMessage": error })
+                            } else {
+                                res.json({ "status": "success", "token": token, "architect_id": items[0]._id })
+                            }
+                        })
+                } else {
+                    res.json({ "status": "incorrect password" })
+                }
+            } else {
+                res.json({ "status": "invalid email id" })
+            }
+        }
+    ).catch()
 })
 
 app.listen(8080, ()=>{

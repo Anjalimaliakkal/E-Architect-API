@@ -9,13 +9,13 @@ const architectSchema=mongoose.Schema(
             type:String,
             required:true
         },
-        email:{
+        emailid:{
             type:String,
             required:true
         },
         profile_pic:{
             type:String,
-           // required:true
+           required:true
         },
         password:{
             type:String,
