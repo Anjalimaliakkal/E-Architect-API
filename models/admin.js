@@ -1,5 +1,5 @@
 const mongoose=require("mongoose")
-const loginSchema=mongoose.Schema(
+const adminSchema=mongoose.Schema(
     {
         username:{
             type:String,
@@ -12,5 +12,5 @@ const loginSchema=mongoose.Schema(
     }
 )
 
-const loginModel=mongoose.model("logindata",loginSchema)
-module.exports=loginModel
+const adminModel=mongoose.model("admindata",adminSchema)
+module.exports=adminModel
