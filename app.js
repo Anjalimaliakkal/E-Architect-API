@@ -5,6 +5,7 @@ const cors=require("cors")
 const jwt=require("jsonwebtoken")
 const adminModel=require("./models/admin")
 const architectModel=require("./models/architect")
+const customerModel=require("./models/customer")
 
 const app=express()
 app.use(cors())
@@ -77,7 +78,6 @@ app.post("/adminSignin", (req, res) => {
      }
 });
 
-
 //architect login
 app.post("/architectLogin", async (req, res) => {
     const { email, password } = req.body;
@@ -107,6 +107,37 @@ app.post("/architectLogin", async (req, res) => {
         res.json({ "status": "success", "token": token });
     } catch (error) {
         res.json({ "status": "error", "message": "Server error", "error": error.message });
+    }
+});
+
+//customer signup
+app.post("/customerSignup", async (req, res) => {
+    try {
+        let input = req.body;
+
+        // Hash the password before saving it
+        let hashedPassword = bcrypt.hashSync(input.password, 10);
+        input.password = hashedPassword;
+
+        // Generate a unique customer ID
+        const dateObject = new Date();
+        const currentYear = dateObject.getFullYear();
+        const currentMonth = dateObject.getMonth() + 1;
+        const randomNumber = Math.floor(Math.random() * 9999) + 1000;
+        const customer_id = "ARC" + currentYear.toString() + currentMonth.toString() + randomNumber.toString();
+        
+        input.customer_id = customer_id;
+
+        // Create a new customer object
+        let newCustomer = new customerModel(input);
+        
+        // Save the customer to the database
+        await newCustomer.save();
+        
+        res.json({ status: "success", message: "Customer signed up successfully", customer_id: customer_id });
+    } catch (error) {
+        console.error("Error signing up customer:", error);
+        res.json({ status: "error", message: "An error occurred during signup. Please try again later." });
     }
 });
 
