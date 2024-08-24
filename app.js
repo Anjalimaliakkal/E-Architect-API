@@ -154,7 +154,7 @@ app.post("/CustomerLogin",async(req,res)=>{
                             if (error) {
                                 res.json({ "status": "error", "errorMessage": error })
                             } else {
-                                res.json({ "status": "success", "token": token, "patient_id": items[0]._id })
+                                res.json({ "status": "success", "token": token, "customer_id": items[0]._id })
                             }
                         })
                 } else {
