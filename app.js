@@ -25,6 +25,7 @@ app.post("/adminSignup", (req, res) => {
 
 })
 
+//admin signup
 app.post("/adminSignin", (req, res) => {
     let input = req.body
     let result = adminModel.find({ username: input.username }).then(
@@ -50,19 +51,66 @@ app.post("/adminSignin", (req, res) => {
     ).catch()
 })
 
-app.post("/addArchitect", (req, res) => {
-    let input = req.body
-    let token=req.headers.token
-    jwt.verify(token,"E-Architect",(error,decoded)=>{
-        if (decoded && decoded.email) {
-            let result=new architectModel(input)
-            result.save()
-            res.json({ "status": "success" })
-        } else {
-            res.json({ "status": "invalid authentication" })
+//add architect by admin
+ app.post("/addArchitect", async (req, res) => {
+     const input = req.body;
+     const token = req.headers.token;
+
+     try {
+         const decoded = jwt.verify(token, "E-Architect");
+         if (decoded && decoded.email) {
+             // Hash the password before saving
+             input.password = await bcrypt.hash(input.password, 10);
+
+             // Create a new architect instance
+             const newArchitect = new architectModel(input);
+
+             // Save the architect instance
+             await newArchitect.save();
+
+             res.json({ "status": "success" });
+         } else {
+             res.json({ "status": "invalid authentication" });
+         }
+     } catch (error) {
+         res.json({ "status": "error", "message": error.message });
+     }
+});
+
+
+//architect login
+app.post("/architectLogin", async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        // Find the architect by email
+        const architect = await architectModel.findOne({ email: email });
+
+        if (!architect) {
+            return res.json({ "status": "error", "message": "Invalid email or password" });
         }
-    })
-})
+
+        // Compare the provided password with the stored hashed password
+        const isMatch = await bcrypt.compare(password, architect.password);
+
+        if (!isMatch) {
+            return res.json({ "status": "error", "message": "Invalid email or password" });
+        }
+
+        // Password is correct, create and return a JWT token
+        const token = jwt.sign(
+            { email: architect.email, id: architect._id },
+            "E-Architect",
+            { expiresIn: '1h' } // Token expires in 1 hour
+        );
+
+        res.json({ "status": "success", "token": token });
+    } catch (error) {
+        res.json({ "status": "error", "message": "Server error", "error": error.message });
+    }
+});
+
+
 
 app.listen(8080, ()=>{
     console.log("server started")
