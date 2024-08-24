@@ -141,6 +141,31 @@ app.post("/customerSignup", async (req, res) => {
     }
 });
 
+app.post("/CustomerLogin",async(req,res)=>{
+    let input=req.body
+    let result = customerModel.find({ email: req.body.email }).then(
+        (items) => {
+            if (items.length > 0) {
+                const passwordValidator = bcrypt.compareSync(req.body.password, items[0].password)
+                if (passwordValidator) {
+
+                    jwt.sign({ email: req.body.email }, "E-Architect", { expiresIn: "7d" },
+                        (error, token) => {
+                            if (error) {
+                                res.json({ "status": "error", "errorMessage": error })
+                            } else {
+                                res.json({ "status": "success", "token": token, "patient_id": items[0]._id })
+                            }
+                        })
+                } else {
+                    res.json({ "status": "incorrect password" })
+                }
+            } else {
+                res.json({ "status": "invalid email id" })
+            }
+        }
+    ).catch()
+})
 
 
 app.listen(8080, ()=>{
