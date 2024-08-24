@@ -52,46 +52,65 @@ app.post("/adminSignin", (req, res) => {
 })
 
 //add architect by admin
-app.post("/addArchitect", (req, res) => {
-    let input = req.body
-    let token=req.headers.token
-    jwt.verify(token,"E-Architect",(error,decoded)=>{
-        if (decoded && decoded.email) {
-            let result=new architectModel(input)
-            result.save()
-            res.json({ "status": "success" })
-        } else {
-            res.json({ "status": "invalid authentication" })
-        }
-    })
-})
+ app.post("/addArchitect", async (req, res) => {
+     const input = req.body;
+     const token = req.headers.token;
+
+     try {
+         const decoded = jwt.verify(token, "E-Architect");
+         if (decoded && decoded.email) {
+             // Hash the password before saving
+             input.password = await bcrypt.hash(input.password, 10);
+
+             // Create a new architect instance
+             const newArchitect = new architectModel(input);
+
+             // Save the architect instance
+             await newArchitect.save();
+
+             res.json({ "status": "success" });
+         } else {
+             res.json({ "status": "invalid authentication" });
+         }
+     } catch (error) {
+         res.json({ "status": "error", "message": error.message });
+     }
+});
+
 
 //architect login
-app.post("/ArchitectLogin",async(req,res)=>{
-    let input=req.body
-    let result = architectModel.find({ emailid: req.body.emailid }).then(
-        (items) => {
-            if (items.length > 0) {
-                const passwordValidator = bcrypt.compareSync(req.body.password, items[0].password)
-                if (passwordValidator) {
+app.post("/architectLogin", async (req, res) => {
+    const { email, password } = req.body;
 
-                    jwt.sign({ emailid: req.body.emailid }, "E-Architect", { expiresIn: "7d" },
-                        (error, token) => {
-                            if (error) {
-                                res.json({ "status": "error", "errorMessage": error })
-                            } else {
-                                res.json({ "status": "success", "token": token, "architect_id": items[0]._id })
-                            }
-                        })
-                } else {
-                    res.json({ "status": "incorrect password" })
-                }
-            } else {
-                res.json({ "status": "invalid email id" })
-            }
+    try {
+        // Find the architect by email
+        const architect = await architectModel.findOne({ email: email });
+
+        if (!architect) {
+            return res.json({ "status": "error", "message": "Invalid email or password" });
         }
-    ).catch()
-})
+
+        // Compare the provided password with the stored hashed password
+        const isMatch = await bcrypt.compare(password, architect.password);
+
+        if (!isMatch) {
+            return res.json({ "status": "error", "message": "Invalid email or password" });
+        }
+
+        // Password is correct, create and return a JWT token
+        const token = jwt.sign(
+            { email: architect.email, id: architect._id },
+            "E-Architect",
+            { expiresIn: '1h' } // Token expires in 1 hour
+        );
+
+        res.json({ "status": "success", "token": token });
+    } catch (error) {
+        res.json({ "status": "error", "message": "Server error", "error": error.message });
+    }
+});
+
+
 
 app.listen(8080, ()=>{
     console.log("server started")
