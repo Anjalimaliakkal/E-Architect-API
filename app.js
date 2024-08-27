@@ -26,7 +26,7 @@ app.post("/adminSignup", (req, res) => {
 
 })
 
-//admin signup
+//admin signin
 app.post("/adminSignin", (req, res) => {
     let input = req.body
     let result = adminModel.find({ username: input.username }).then(
@@ -141,6 +141,7 @@ app.post("/customerSignup", async (req, res) => {
     }
 });
 
+//customer login
 app.post("/CustomerLogin",async(req,res)=>{
     let input=req.body
     let result = customerModel.find({ email: req.body.email }).then(
@@ -167,6 +168,16 @@ app.post("/CustomerLogin",async(req,res)=>{
     ).catch()
 })
 
+//viewall customers
+app.get("/ViewAllCustomers", (req, res) => {
+    customerModel.find().then(
+        (data) => {
+            res.json(data)
+        }
+    ).catch((error) => {
+        res.json(error)
+    })
+})
 
 app.listen(8080, ()=>{
     console.log("server started")
