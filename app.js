@@ -1,13 +1,13 @@
-const express=require("express")
-const mongoose=require("mongoose")
-const bcrypt=require("bcrypt")
-const cors=require("cors")
-const jwt=require("jsonwebtoken")
-const adminModel=require("./models/admin")
-const architectModel=require("./models/architect")
-const customerModel=require("./models/customer")
+const express = require("express")
+const mongoose = require("mongoose")
+const bcrypt = require("bcrypt")
+const cors = require("cors")
+const jwt = require("jsonwebtoken")
+const adminModel = require("./models/admin")
+const architectModel = require("./models/architect")
+const customerModel = require("./models/customer")
 
-const app=express()
+const app = express()
 app.use(cors())
 app.use(express.json())
 
@@ -26,7 +26,7 @@ app.post("/adminSignup", (req, res) => {
 
 })
 
-//admin signup
+//admin signin
 app.post("/adminSignin", (req, res) => {
     let input = req.body
     let result = adminModel.find({ username: input.username }).then(
@@ -37,7 +37,7 @@ app.post("/adminSignin", (req, res) => {
                     jwt.sign({ email: input.username }, "E-Architect", { expiresIn: "7d" },
                         (error, token) => {
                             if (error) {
-                                res.json({"status":"token creation failed"})
+                                res.json({ "status": "token creation failed" })
                             } else {
                                 res.json({ "status": "success", "token": token })
                             }
@@ -53,29 +53,29 @@ app.post("/adminSignin", (req, res) => {
 })
 
 //add architect by admin
- app.post("/addArchitect", async (req, res) => {
-     const input = req.body;
-     const token = req.headers.token;
+app.post("/addArchitect", async (req, res) => {
+    const input = req.body;
+    const token = req.headers.token;
 
-     try {
-         const decoded = jwt.verify(token, "E-Architect");
-         if (decoded && decoded.email) {
-             // Hash the password before saving
-             input.password = await bcrypt.hash(input.password, 10);
+    try {
+        const decoded = jwt.verify(token, "E-Architect");
+        if (decoded && decoded.email) {
+            // Hash the password before saving
+            input.password = await bcrypt.hash(input.password, 10);
 
-             // Create a new architect instance
-             const newArchitect = new architectModel(input);
+            // Create a new architect instance
+            const newArchitect = new architectModel(input);
 
-             // Save the architect instance
-             await newArchitect.save();
+            // Save the architect instance
+            await newArchitect.save();
 
-             res.json({ "status": "success" });
-         } else {
-             res.json({ "status": "invalid authentication" });
-         }
-     } catch (error) {
-         res.json({ "status": "error", "message": error.message });
-     }
+            res.json({ "status": "success" });
+        } else {
+            res.json({ "status": "invalid authentication" });
+        }
+    } catch (error) {
+        res.json({ "status": "error", "message": error.message });
+    }
 });
 
 //architect login
@@ -115,6 +115,11 @@ app.post("/customerSignup", async (req, res) => {
     try {
         let input = req.body;
 
+        // Ensure the password is provided
+        if (!input.password) {
+            return res.status(400).json({ status: "error", message: "Password is required" });
+        }
+
         // Hash the password before saving it
         let hashedPassword = bcrypt.hashSync(input.password, 10);
         input.password = hashedPassword;
@@ -125,24 +130,25 @@ app.post("/customerSignup", async (req, res) => {
         const currentMonth = dateObject.getMonth() + 1;
         const randomNumber = Math.floor(Math.random() * 9999) + 1000;
         const customer_id = "ARC" + currentYear.toString() + currentMonth.toString() + randomNumber.toString();
-        
+
         input.customer_id = customer_id;
 
         // Create a new customer object
         let newCustomer = new customerModel(input);
-        
+
         // Save the customer to the database
         await newCustomer.save();
-        
+
         res.json({ status: "success", message: "Customer signed up successfully", customer_id: customer_id });
     } catch (error) {
         console.error("Error signing up customer:", error);
-        res.json({ status: "error", message: "An error occurred during signup. Please try again later." });
+        res.status(500).json({ status: "error", message: "An error occurred during signup. Please try again later." });
     }
 });
 
-app.post("/CustomerLogin",async(req,res)=>{
-    let input=req.body
+//customer login
+app.post("/CustomerLogin", async (req, res) => {
+    let input = req.body
     let result = customerModel.find({ email: req.body.email }).then(
         (items) => {
             if (items.length > 0) {
@@ -167,7 +173,22 @@ app.post("/CustomerLogin",async(req,res)=>{
     ).catch()
 })
 
+//viewall customers
+app.get("/ViewAllCustomers", (req, res) => {
+    customerModel.find().then(
+        (data) => {
+            res.json(data)
+        }
+    ).catch((error) => {
+        res.json(error)
+    })
+})
 
-app.listen(8080, ()=>{
+
+
+
+
+
+app.listen(8080, () => {
     console.log("server started")
 })
