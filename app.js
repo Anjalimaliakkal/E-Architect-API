@@ -184,9 +184,16 @@ app.get("/ViewAllCustomers", (req, res) => {
     })
 })
 
-
-
-
+//viewall architects
+app.get("/ViewAllArchitects", (req, res) => {
+    architectModel.find().then(
+        (data) => {
+            res.json(data)
+        }
+    ).catch((error) => {
+        res.json(error)
+    })
+})
 
 
 app.listen(8080, () => {
