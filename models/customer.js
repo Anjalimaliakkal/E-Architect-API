@@ -1,6 +1,10 @@
 const mongoose=require("mongoose")
 const customerSchema=mongoose.Schema(
     {
+        customer_id:{
+            type:String,
+            required:true
+        },
         name:{
             type:String,
             required:true
