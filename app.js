@@ -206,6 +206,19 @@ app.post("/AddFeedback", (req, res) => {
 })
 
 //view Feedback
+app.get("/viewfeedback",(req,res)=>{
+    feedbacksmodel.find().then(
+      (data)=>{
+          res.json(data)
+      }
+    ).catch((error)=>{
+  
+      res.json(error)
+    })  
+  })
+
+//update architect profile
+
 
 
 app.listen(8080, () => {
