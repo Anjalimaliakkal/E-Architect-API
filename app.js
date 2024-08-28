@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken")
 const adminModel = require("./models/admin")
 const architectModel = require("./models/architect")
 const customerModel = require("./models/customer")
+const feedbacksmodel=require("./models/feedback")
 
 const app = express()
 app.use(cors())
@@ -196,7 +197,13 @@ app.get("/ViewAllArchitects", (req, res) => {
 })
 
 //add Feedback
-
+app.post("/AddFeedback", (req, res) => {
+    let input = req.body
+    console.log(input)
+    let feedback = new feedbacksmodel(input)
+    feedback.save()
+    res.json({ "status": "success" })
+})
 
 app.listen(8080, () => {
     console.log("server started")
