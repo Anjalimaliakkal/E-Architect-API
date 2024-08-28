@@ -205,6 +205,22 @@ app.post("/AddFeedback", (req, res) => {
     res.json({ "status": "success" })
 })
 
+//view Feedback
+app.get("/viewfeedback",(req,res)=>{
+    feedbacksmodel.find().then(
+      (data)=>{
+          res.json(data)
+      }
+    ).catch((error)=>{
+  
+      res.json(error)
+    })  
+  })
+
+//update architect profile
+
+
+
 app.listen(8080, () => {
     console.log("server started")
 })
