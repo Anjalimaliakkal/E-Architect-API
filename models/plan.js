@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 const schema = mongoose.Schema(
     {
-        planId: {
+        planRequestId: {
             type: mongoose.Schema.Types.ObjectId
         },
         customer_id: {
@@ -24,6 +24,10 @@ const schema = mongoose.Schema(
         timeline: {
             type: String,
             required: true
+        },
+        status: {
+            type: String,
+            default: 'pending',
         },
         date: {
             type: Date,

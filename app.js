@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken")
 const adminModel = require("./models/admin")
 const architectModel = require("./models/architect")
 const customerModel = require("./models/customer")
-const feedbacksmodel=require("./models/feedback")
+const feedbacksmodel = require("./models/feedback")
 const planmodel = require("./models/plan")
 
 const app = express()
@@ -207,16 +207,16 @@ app.post("/AddFeedback", (req, res) => {
 })
 
 //view Feedback
-app.get("/viewfeedback",(req,res)=>{
+app.get("/viewfeedback", (req, res) => {
     feedbacksmodel.find().then(
-      (data)=>{
-          res.json(data)
-      }
-    ).catch((error)=>{
-  
-      res.json(error)
-    })  
-  })
+        (data) => {
+            res.json(data)
+        }
+    ).catch((error) => {
+
+        res.json(error)
+    })
+})
 
 //update architect profile by email
 app.put("/updateArchitect", async (req, res) => {
@@ -255,23 +255,23 @@ app.put("/updateArchitect", async (req, res) => {
 });
 
 //add plan request
- app.post("/addPlanRequest", async (req, res) => {
-     let input = req.body
+app.post("/addPlanRequest", async (req, res) => {
+    let input = req.body
 
-     let token = req.headers.token
+    let token = req.headers.token
 
-     jwt.verify(token, "E-Architect", async (error, decoded) => {
-         if (decoded && decoded.email) {
-             let result = new planmodel(input)
-             await result.save()
-             res.json({ "status": "success" })
+    jwt.verify(token, "E-Architect", async (error, decoded) => {
+        if (decoded && decoded.email) {
+            let result = new planmodel(input)
+            await result.save()
+            res.json({ "status": "success" })
 
-         } else {
-             res.json({ "status": "invalid Authentication" })
-         }
-     })
+        } else {
+            res.json({ "status": "invalid Authentication" })
+        }
+    })
 
- })
+})
 //view all plan requests
 app.get("/viewPlanRequests", (req, res) => {
 
@@ -293,6 +293,9 @@ app.get("/viewPlanRequests", (req, res) => {
         }
     })
 })
+
+//upload plan and make payment request
+
 
 
 app.listen(8080, () => {
