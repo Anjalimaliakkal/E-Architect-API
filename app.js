@@ -102,7 +102,7 @@ app.post("/architectLogin", async (req, res) => {
         const token = jwt.sign(
             { email: architect.email, id: architect._id },
             "E-Architect",
-            { expiresIn: '1h' } // Token expires in 1 hour
+            { expiresIn: '1d' } // Token expires in 1 hour
         );
 
         res.json({ "status": "success", "token": token });
@@ -217,7 +217,43 @@ app.get("/viewfeedback",(req,res)=>{
     })  
   })
 
-//update architect profile
+//update architect profile by email
+app.put("/updateArchitect", async (req, res) => {
+    const { email, ...input } = req.body; // Extract email and other data to update from the request body
+    const token = req.headers['token']; // Extract token from custom header
+
+    if (!token) {
+        return res.json({ "status": "failure", "message": "JWT must be provided" });
+    }
+
+    try {
+        // Verify the token
+        const decoded = jwt.verify(token, "E-Architect");
+        if (!decoded || decoded.email !== email) {
+            return res.json({ "status": "failure", "message": "Invalid authentication" });
+        }
+
+        // Find the architect by email
+        let architect = await architectModel.findOne({ email: email });
+        if (!architect) {
+            return res.json({ "status": "failure", "message": "Architect not found" });
+        }
+
+        // Update only if the password field is provided in the request body
+        if (input.password) {
+            input.password = await bcrypt.hash(input.password, 10);
+        }
+
+        // Update the architect with new data
+        architect = await architectModel.findOneAndUpdate({ email: email }, input, { new: true });
+
+        res.json({ "status": "success", "data": architect });
+    } catch (error) {
+        res.json({ "status": "failure", "message": error.message });
+    }
+});
+
+
 
 
 
