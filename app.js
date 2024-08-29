@@ -7,6 +7,7 @@ const adminModel = require("./models/admin")
 const architectModel = require("./models/architect")
 const customerModel = require("./models/customer")
 const feedbacksmodel=require("./models/feedback")
+const planmodel = require("./models/plan")
 
 const app = express()
 app.use(cors())
@@ -253,7 +254,24 @@ app.put("/updateArchitect", async (req, res) => {
     }
 });
 
+//add plan requirements
+ app.post("/addPlanRequirements", async (req, res) => {
+     let input = req.body
 
+     let token = req.headers.token
+
+     jwt.verify(token, "E-Architect", async (error, decoded) => {
+         if (decoded && decoded.email) {
+             let result = new planmodel(input)
+             await result.save()
+             res.json({ "status": "success" })
+
+         } else {
+             res.json({ "status": "invalid Authentication" })
+         }
+     })
+
+ })
 
 
 

@@ -1,11 +1,11 @@
 const mongoose = require("mongoose")
 const schema = mongoose.Schema(
     {
-        "rating": {
+        rating: {
             type: String,
             required: true
         },
-        "comments": {
+        comments: {
             type: String,
             required: true
         }
