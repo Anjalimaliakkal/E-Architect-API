@@ -20,6 +20,14 @@ const architectSchema=mongoose.Schema(
         password:{
             type:String,
             required:true
+        },
+        experience:{
+            type:String,
+            required:true
+        },
+        skills:{
+            type:String,
+            required:true
         }
     }
 )
