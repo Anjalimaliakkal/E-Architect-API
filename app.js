@@ -272,7 +272,27 @@ app.put("/updateArchitect", async (req, res) => {
      })
 
  })
+//view all plan requests
+app.get("/viewPlanRequests", (req, res) => {
 
+    let token = req.headers.token
+    jwt.verify(token, "E-Architect", (error, decoded) => {
+        if (decoded && decoded.email) {
+
+            planmodel.find().then(
+                (items) => {
+                    res.json(items)
+                }
+            ).catch(
+                (error) => {
+                    res.json({ "status": "error" })
+                }
+            )
+        } else {
+            res.json({ "status": "invalid Authentication" })
+        }
+    })
+})
 
 
 app.listen(8080, () => {
