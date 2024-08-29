@@ -254,8 +254,8 @@ app.put("/updateArchitect", async (req, res) => {
     }
 });
 
-//add plan requirements
- app.post("/addPlanRequirements", async (req, res) => {
+//add plan request
+ app.post("/addPlanRequest", async (req, res) => {
      let input = req.body
 
      let token = req.headers.token
