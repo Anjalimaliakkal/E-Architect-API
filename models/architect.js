@@ -1,6 +1,10 @@
 const mongoose=require("mongoose")
 const architectSchema=mongoose.Schema(
     {
+        architectId:{
+            type:String,
+            required:true
+        },
         name:{
             type:String,
             required:true

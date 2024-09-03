@@ -4,6 +4,10 @@ const schema = mongoose.Schema(
         planRequestId: {
             type: mongoose.Schema.Types.ObjectId
         },
+        architectId: {
+            type: String,
+            required: true
+        },
         customer_id: {
             type: String,
             required: true
@@ -29,9 +33,14 @@ const schema = mongoose.Schema(
             type: String,
             default: 'pending',
         },
-        date: {
+
+        createdAt: {
             type: Date,
-            default: Date.now
+            default: Date.now,
+        },
+        updatedAt: {
+            type: Date,
+            default: Date.now,
         }
     }
 )

@@ -8,6 +8,8 @@ const architectModel = require("./models/architect")
 const customerModel = require("./models/customer")
 const feedbacksmodel = require("./models/feedback")
 const planmodel = require("./models/plan")
+const UploadedPlanmodel = require("./models/planUpload")
+const PaymentRequestmodel = require("./models/paymentRequest")
 
 const app = express()
 app.use(cors())
@@ -62,8 +64,12 @@ app.post("/addArchitect", async (req, res) => {
     try {
         const decoded = jwt.verify(token, "E-Architect");
         if (decoded && decoded.email) {
+            // Generate a unique architect ID
+            const architectId = `ARC${Date.now()}${Math.floor(Math.random() * 1000)}`;
+
             // Hash the password before saving
             input.password = await bcrypt.hash(input.password, 10);
+            input.architectId = architectId; // Assign the generated ID
 
             // Create a new architect instance
             const newArchitect = new architectModel(input);
@@ -71,7 +77,7 @@ app.post("/addArchitect", async (req, res) => {
             // Save the architect instance
             await newArchitect.save();
 
-            res.json({ "status": "success" });
+            res.json({ "status": "success", "architectId": architectId });
         } else {
             res.json({ "status": "invalid authentication" });
         }
@@ -80,37 +86,34 @@ app.post("/addArchitect", async (req, res) => {
     }
 });
 
+
 //architect login
-app.post("/architectLogin", async (req, res) => {
-    const { email, password } = req.body;
+ app.post("/architectLogin", async (req, res) => {
+     const { email, password } = req.body;
 
-    try {
-        // Find the architect by email
-        const architect = await architectModel.findOne({ email: email });
+     try {
+         // Find the architect by email
+         const architect = await architectModel.findOne({ email: email });
 
-        if (!architect) {
-            return res.json({ "status": "error", "message": "Invalid email or password" });
-        }
+         if (!architect) {
+             return res.json({ "status": "error", "message": "Invalid email or password" });
+         }
 
-        // Compare the provided password with the stored hashed password
-        const isMatch = await bcrypt.compare(password, architect.password);
+         // Compare the provided password with the stored hashed password
+         const isMatch = await bcrypt.compare(password, architect.password);
 
-        if (!isMatch) {
-            return res.json({ "status": "error", "message": "Invalid email or password" });
-        }
+         if (!isMatch) {
+             return res.json({ "status": "error", "message": "Invalid email or password" });
+         }
 
-        // Password is correct, create and return a JWT token
-        const token = jwt.sign(
-            { email: architect.email, id: architect._id },
-            "E-Architect",
-            { expiresIn: '1d' } // Token expires in 1 hour
-        );
+         // Password is correct, create and return a JWT token
+         const token = jwt.sign({ architectId: architect.architectId, email: architect.email }, "E-Architect", { expiresIn: '1d' });
 
-        res.json({ "status": "success", "token": token });
-    } catch (error) {
-        res.json({ "status": "error", "message": "Server error", "error": error.message });
-    }
-});
+         res.json({ "status": "success", "token": token,"architectId": architect.architectId });
+     } catch (error) {
+         res.json({ "status": "error", "message": "Server error", "error": error.message });
+     }
+ });
 
 //customer signup
 app.post("/customerSignup", async (req, res) => {
@@ -131,7 +134,7 @@ app.post("/customerSignup", async (req, res) => {
         const currentYear = dateObject.getFullYear();
         const currentMonth = dateObject.getMonth() + 1;
         const randomNumber = Math.floor(Math.random() * 9999) + 1000;
-        const customer_id = "ARC" + currentYear.toString() + currentMonth.toString() + randomNumber.toString();
+        const customer_id = "CUS" + currentYear.toString() + currentMonth.toString() + randomNumber.toString();
 
         input.customer_id = customer_id;
 
@@ -294,7 +297,37 @@ app.get("/viewPlanRequests", (req, res) => {
     })
 })
 
-//upload plan and make payment request
+//architect upload plan 
+app.post("/uploadPlan", async (req, res) => {
+    const { planRequestId, planFileUrl } = req.body;
+    const token = req.headers['token'];
+
+    try {
+        const decoded = jwt.verify(token, "E-Architect");
+        if (!decoded || !decoded.architectId) {
+            return res.status(401).json({ "status": "failure", "message": "Invalid authentication" });
+        }
+
+        // Find the plan by ID
+        const plan = await plan.findById(planRequestId);
+        if (!plan) {
+            return res.status(404).json({ "status": "failure", "message": "Plan requirement not found" });
+        }
+
+        // Create a new PlanUpload record
+        const planUpload = new UploadedPlanmodel({
+            planRequestId: plan._id,
+            architectId: decoded.architectId,
+            planFileUrl: planFileUrl,
+        });
+        await planUpload.save();
+
+        res.json({ "status": "success", "message": "Plan uploaded successfully" });
+
+    } catch (error) {
+        res.status(500).json({ "status": "failure", "message": error.message });
+    }
+});
 
 
 
